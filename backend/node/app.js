@@ -5,6 +5,9 @@ app.use(express.json());
 const axios = require('axios');
 import { generatePattern } from './pattern.js';
 
+const connectDB = require('./db');
+connectDB();
+
 // Simple function to genereate user id (sequential ids)
 let nextId = 1; // Start from 1
 
