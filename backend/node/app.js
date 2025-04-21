@@ -116,6 +116,26 @@ app.delete('/user/:id', async(req,res) => {
 });
 
 
+// Log in a user
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+    // Look up the user in the database and compare 
+   /*  placeholder for the backend logic, return 401 error if it does not match the database record. 
+     */
+    res.status(200).json({ message: 'Login successful'});
+  } catch (err) {
+    console.error('Error during login:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
