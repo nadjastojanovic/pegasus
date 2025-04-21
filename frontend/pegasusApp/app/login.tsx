@@ -11,6 +11,7 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     //backend logic placeholder for log in
+    //router.push('/(tabs)/home');  // open the home page after a sucessfull backend call 
   };
 
   return (
