@@ -4,15 +4,14 @@
 export function generatePattern(level) {
 // number of pins per level.
     const levelLengths = {
-      1: 4,
-      2: 8,
-      3: 12,
-      4: 16
+      1: 2,
+      2: 3,
+      3: 6,
     };
 
     const patternLength = levelLengths[level];
     // there are 16 possible pins, so array of length 16 to represent all possible pins
-    const pins = Array.from({ length: 16 }, (_, i) => i + 1);
+    const pins = Array.from({ length: 6 }, (_, i) => i + 1);
   
     // Shuffles the array
     for (let i = pins.length - 1; i > 0; i--) {
