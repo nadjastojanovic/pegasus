@@ -6,7 +6,6 @@ const axios = require('axios');
 const connectDB = require('./db');
 const User = require('./models/User');
 const Progress = require('./models/Progress');
-const { generatePattern } = require('./pattern.js');
 
 // Connect to database
 connectDB();
@@ -17,6 +16,13 @@ function generateSequentialId() {
   return String(nextId++).padStart(4, '0');
 }
 
+const levelPatterns = {
+  1:[1, 2, 3, 4, 5, 6],
+  2:[3, 2,1,6, 5,4],
+  3:[1,5,3,2,4,6],
+  4:[6,1, 3,4, 2,5],
+};
+
 // Placeholder for Arduino URL
 const ARDUINO_URL = 'http://123.com';
 
@@ -25,13 +31,13 @@ const ARDUINO_URL = 'http://123.com';
 // Sends an array of pins to the Arduino backend depending on the level selected
 app.post('/setLevel', async (req, res) => {
   const { level } = req.body;
-  if (!level) {
-    return res.status(400).json({ error: "Level is required in the request body" });
-  }
   try {
-    const pattern = generatePattern(level);
-    await axios.post(ARDUINO_URL, { level, pattern });
-    res.json({ message: "Pattern generated and sent to Arduino.", level, pattern });
+    const pattern = levelPatterns[level];
+    if (!pattern) {
+      return res.status(400).json({ error: "Invalid level" });
+    } 
+    await axios.post(ARDUINO_URL, { pattern });
+    res.json({ message: "Pattern sent to Arduino.", pattern });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
