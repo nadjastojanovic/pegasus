@@ -1,11 +1,48 @@
 const express = require('express');
+const cors    = require('cors');
 const app = express();
-const port = process.env.PORT || 3000;
+
+app.use(cors());    
 app.use(express.json());
+
+const port = process.env.PORT || 3000;
+
 const axios = require('axios');
 const connectDB = require('./db');
 const User = require('./models/User');
 const Progress = require('./models/Progress');
+
+/* ARDUINO SETUP SERIAL PORT */
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
+
+const ARDUINO_PORT = '/dev/tty.usbserial-110';
+const BAUD_RATE = 9600;
+
+const arduino = new SerialPort({ path: ARDUINO_PORT, baudRate: BAUD_RATE });
+const parser  = arduino.pipe(new ReadlineParser({ delimiter: '\n' }));
+
+let lastLevel   = null;
+let lastPattern = null;
+
+// listen for when arduino prints DURATION:X
+parser.on('data', line => {
+  line = line.trim();
+  if (!line.startsWith('DURATION:')) return;
+  const timeTaken = parseFloat(line.split(':')[1]);
+  if (lastLevel == null || lastPattern == null) {
+    console.warn('No level/pattern in memory - skipping POST');
+    return;
+  }
+  // update user progress USING ID = 1 FOR TESTING
+  axios.post(`http://localhost:3000/user/680d0f0a8854e427154cdef1/progress`, {
+    level:     lastLevel,
+    pattern:   lastPattern,
+    timeTaken,
+  })
+  .then(r => console.log('Progress saved:', timeTaken))
+  .catch(err => console.error('Error saving progress:', err.message));
+});
 
 // Connect to database
 connectDB();
@@ -23,20 +60,28 @@ const levelPatterns = {
   4:[6,1, 3,4, 2,5],
 };
 
-// Placeholder for Arduino URL
-const ARDUINO_URL = 'http://123.com';
-
-/* ROUTES FOR COMMUNICATION BETWEEN ARDUINO AND NODE.JS BACKEND */
-
-// Sends an array of pins to the Arduino backend depending on the level selected
+/* ARDUINO BACKEND COMMUNICATION */
+// sends pattern (as a list of 6 numbers) to the Arduino once the user selects level and clicks Start 
 app.post('/setLevel', async (req, res) => {
   const { level } = req.body;
   try {
     const pattern = levelPatterns[level];
+
     if (!pattern) {
       return res.status(400).json({ error: "Invalid level" });
     } 
-    await axios.post(ARDUINO_URL, { pattern });
+
+    // remember for later when arduino reports back
+    lastLevel   = level;
+    lastPattern = pattern;
+
+    // send comma-separated pattern + newline to Arduino
+    const msg = pattern.join(',') + '\n';
+    arduino.write(msg, err => {
+      if (err) console.error('Error writing to Arduino:', err);
+      else console.log('Sent to Arduino:', msg.trim());
+    });
+
     res.json({ message: "Pattern sent to Arduino.", pattern });
   } catch (error) {
     res.status(500).json({ error: error.message });

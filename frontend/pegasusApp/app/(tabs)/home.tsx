@@ -8,6 +8,7 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
+  Alert
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
@@ -50,13 +51,37 @@ export default function HomeScreen() {
     };
   }, [selectedLevel]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     // Animate button with bounce and glow
     scale.value = withSpring(1.2, { damping: 3 }, () => {
       scale.value = withSpring(1);
     });
 
-    // No alert anymore — ready to transition to level screen later!
+    try {
+      const host = 'http://localhost:3000';
+
+      const res = await fetch(`${host}/setLevel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: selectedLevel }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('Backend error:', err);
+        Alert.alert('Error', 'Could not start sequence');
+        return;
+      }
+
+      const { pattern } = await res.json();
+      console.log('Pattern sent to Arduino:', pattern);
+
+      // 3) optionally, clear the preview or navigate to a “running” screen here
+
+    } catch (e: any) {
+      console.error('Network error:', e);
+      Alert.alert('Network Error', e.message);
+    }
   };
 
   const animatedStyle = useAnimatedStyle(() => {
