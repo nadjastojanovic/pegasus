@@ -1,4 +1,4 @@
-# Pegasus App
+# Pegasus App - CSE310 Assistive Technologies Project - Lehigh University  
 
 Pegasus is a mobile rehabilitation application designed to work alongside an Arduino-based pegboard device. It helps stroke patients improve motor skills by completing predefined patterns on a 6-peg board, while tracking their progress over time.
 
