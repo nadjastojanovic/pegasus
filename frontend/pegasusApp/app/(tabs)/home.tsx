@@ -11,6 +11,7 @@ import {
   Alert
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Dropdown } from 'react-native-element-dropdown';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -28,12 +29,19 @@ const levelPatterns = {
 const pins = [1, 2, 3, 4, 5,6];
 
 export default function HomeScreen() {
-  const [selectedLevel, setSelectedLevel] = useState(1);
+  //const [selectedLevel, setSelectedLevel] = useState(1);
+  const [isFocus, setIsFocus] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [currentHighlight, setCurrentHighlight] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const scale = useSharedValue(1);
 
   useEffect(() => {
+    if (selectedLevel === null) {
+     // Alert.alert('Please select a level first!');
+      return;
+    }
+
     let index = 0;
     if (intervalRef.current) clearInterval(intervalRef.current);
 
@@ -51,7 +59,7 @@ export default function HomeScreen() {
     };
   }, [selectedLevel]);
 
-  const handleStart = async () => {
+  const handleStart = async () => {  
     // Animate button with bounce and glow
     scale.value = withSpring(1.2, { damping: 3 }, () => {
       scale.value = withSpring(1);
@@ -79,8 +87,8 @@ export default function HomeScreen() {
       // 3) optionally, clear the preview or navigate to a “running” screen here
 
     } catch (e: any) {
-      console.error('Network error:', e);
-      Alert.alert('Network Error', e.message);
+      //console.error('Network error:', e);
+    //  Alert.alert('Network Error', e.message);
     }
   };
 
@@ -103,19 +111,31 @@ export default function HomeScreen() {
       <Text style={styles.welcome}>Welcome, Barbara!</Text>
 
       <Text style={styles.label}>Choose a Level:</Text>
-      <View style={styles.dropdown}>
-        <Picker
-          selectedValue={selectedLevel}
-          onValueChange={(value) => setSelectedLevel(value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Pattern 1" value={1} />
-          <Picker.Item label="Pattern 2" value={2} />
-          <Picker.Item label="Pattern 3" value={3} />
-          <Picker.Item label="Pattern 4" value={4} />
-
-        </Picker>
-      </View>
+      <Dropdown
+        style={[styles.dropdown, isFocus && { borderColor: '#6ca6a3' }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={[
+          { label: 'Pattern 1', value: 1 },
+          { label: 'Pattern 2', value: 2 },
+          { label: 'Pattern 3', value: 3 },
+          { label: 'Pattern 4', value: 4 },
+        ]}
+        search={false}
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={!isFocus ? 'Select a Level' : '...'}
+        value={selectedLevel}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={item => {
+          setSelectedLevel(item.value);
+          setIsFocus(false);
+        }}
+      />
 
       <Text style={styles.label}>Pattern Preview:</Text>
       <View style={styles.board}>
@@ -164,15 +184,29 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   dropdown: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
     borderRadius: 8,
-    overflow: 'hidden',
-    width: 200,
+    paddingHorizontal: 8,
+    width: 250,
+    marginBottom: 10,
   },
-  picker: {
-    width: '100%',
-    height: 44,
+  placeholderStyle: {
+    fontSize: 16,
+    color: '#aaa',
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: '#000',
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
   },
   board: {
     flexDirection: 'row',

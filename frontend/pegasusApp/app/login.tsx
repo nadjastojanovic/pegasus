@@ -23,6 +23,7 @@ export default function LoginScreen() {
         <MaterialIcons name="email" size={20} color="#6ca6a3" style={styles.icon} />
         <TextInput
           placeholder="Email"
+          placeholderTextColor="#888"   // <--- Add this line
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -34,6 +35,7 @@ export default function LoginScreen() {
         <FontAwesome name="lock" size={20} color="#6ca6a3" style={styles.icon} />
         <TextInput
           placeholder="Password"
+          placeholderTextColor="#888"   // <--- Add this line
           secureTextEntry
           value={password}
           onChangeText={setPassword}

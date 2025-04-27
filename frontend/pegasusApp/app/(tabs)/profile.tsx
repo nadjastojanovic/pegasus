@@ -9,12 +9,12 @@ export default function ProfileScreen() {
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>barbara@example.com</Text>
+        <Text style={styles.value}>bam426@lehigh.edu</Text>
       </View>
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Date of Birth:</Text>
-        <Text style={styles.value}>May 10, 2002</Text>
+        <Text style={styles.value}>January 1, 2000</Text>
       </View>
 
       <View style={styles.infoBox}>

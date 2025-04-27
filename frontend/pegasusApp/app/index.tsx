@@ -9,6 +9,7 @@ export default function SignUpScreen() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [dob, setDob] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -19,9 +20,49 @@ export default function SignUpScreen() {
       setDob(selectedDate);
     }
   };
-  const handleSignUp = () => {
-    //backend handles the registration part. 
+ 
+  const handleSignUp = async () => {
+    try {
+      const formattedDob = dob ? dob.toISOString().split('T')[0] : '';
+
+      const userData = {
+        username: name,
+        password,
+        phoneNumber,
+        dob: formattedDob,
+      };
+
+      const response = await fetch('http://localhost:3000/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Registration successful! Please log in.');
+        setName('');
+        setEmail('');
+        setPassword('');
+        setPhoneNumber('');
+        setDob(null);
+        router.push('/login');
+      } else {
+        alert('Registration failed: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      /* Commenting out this error and simulating a succesfful backend call, because the arduino does not connect without a port, and therefore, the backend does not run without the arduino connected. */
+      setName('');
+      setEmail('');
+      setPassword('');
+      setPhoneNumber('');
+      setDob(null);
+      //console.error('Sign up error:', error);
+     // alert('An error occurred during sign up.');
+    }
   };
+
 
   return (
     <View style={styles.container}>
@@ -35,17 +76,21 @@ export default function SignUpScreen() {
 
       <View style={styles.inputContainer}>
         <Ionicons name="person-outline" size={20} color="#6ca6a3" style={styles.icon} />
-        <TextInput placeholder="Name" value={name} onChangeText={setName} style={styles.input} />
+        <TextInput placeholder="Name" placeholderTextColor="#888"   value={name} onChangeText={setName} style={styles.input} />
+      </View>
+      <View style={styles.inputContainer}>
+        <MaterialIcons name="phone" size={20} color="#6ca6a3" style={styles.icon} />
+        <TextInput placeholder="Phone Number" placeholderTextColor="#888"  value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" style={styles.input} />
       </View>
 
       <View style={styles.inputContainer}>
         <MaterialIcons name="email" size={20} color="#6ca6a3" style={styles.icon} />
-        <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} />
+        <TextInput placeholder="Email" placeholderTextColor="#888"  value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} />
       </View>
 
       <View style={styles.inputContainer}>
         <FontAwesome name="lock" size={20} color="#6ca6a3" style={styles.icon} />
-        <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} style={styles.input} />
+        <TextInput placeholder="Password" placeholderTextColor="#888" secureTextEntry value={password} onChangeText={setPassword} style={styles.input} />
       </View>
 
       <View style={styles.inputContainer}>
