@@ -11,7 +11,7 @@
 </div>
 
 <div align="center">
-    <h3 align="center">Pegasus</h3>
+    <h1 align="center">Pegasus</h1>
 
   <p align="center">
     A digital pegboard game combining Arduino-powered hardware and a companion mobile app to support hand dexterity training and cognitive rehabilitation. 
